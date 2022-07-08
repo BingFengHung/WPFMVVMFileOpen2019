@@ -10,3 +10,8 @@ View 與 ViewModel 的檔案。
 
 ## 支援
 目前支援 Visual Studio 2019 版本
+
+## 開發套件
+- Microsoft.VisualStudio.SDK  => 16.0.202
+- Microsoft.VisualStudio.Threading => 16.0.102
+- Microsoft.VSSDK.BuildTools => 16.0.2264
