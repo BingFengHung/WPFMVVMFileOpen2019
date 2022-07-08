@@ -56,7 +56,7 @@
         <Parent guid="guidWPFMVVMFileOpen2019PackageCmdSet" id="MyMenuGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
-          <ButtonText>Invoke OpenFileCommand</ButtonText>
+          <ButtonText>Jump between MVVM File</ButtonText>
         </Strings>
       </Button>
     </Buttons>
@@ -72,9 +72,9 @@
     </Bitmaps>
   </Commands>
 
-  <!--<KeyBindings>
-    <KeyBinding guid="guidWPFMVVMFileOpen2019Package" id="OpenFileCommandId"  mod1="Control" key1="VK_F7" editor="guidVSStd97" />
-  </KeyBindings>-->
+  <KeyBindings>
+    <KeyBinding guid="guidWPFMVVMFileOpen2019PackageCmdSet" id="OpenFileCommandId" mod1="CONTROL" key1="VK_F7" editor="guidVSStd97" />
+  </KeyBindings>
 
 
   <Symbols>

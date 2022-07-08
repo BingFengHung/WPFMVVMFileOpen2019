@@ -91,23 +91,35 @@ namespace WPFMVVMFileOpen2019
         private void Execute(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
-            string title = "OpenFileCommand";
 
-            var targetProjectPath = FindProjectPath();
-            FileInfo file = new FileInfo(targetProjectPath);
-            var projectDirectory = file.Directory.FullName;
+            var csprojFilePath = FindCsProjectPath();
+            FileInfo fileInfo = new FileInfo(csprojFilePath);
+            var projectDirectory = fileInfo.Directory.FullName;
 
             if (!string.IsNullOrEmpty(projectDirectory))
             {
-                var fileName = GetActivateFileName();
+                var activeFileName = GetActivateFileName();
 
-                if (fileName.EndsWith("View"))
-                    fileName += "Model";
-                else
-                    fileName += "ViewModel";
+                string targetFile = string.Empty;
 
-                string targetFile = FindRelativeFile(projectDirectory, fileName);
+                if (activeFileName.EndsWith(".xaml.cs") || activeFileName.EndsWith(".xaml"))
+                {
+                    activeFileName = activeFileName.Replace(".xaml.cs", string.Empty).Replace(".xaml", string.Empty);
+
+                    activeFileName = activeFileName.EndsWith("View") ? $"{activeFileName}Model" : $"{activeFileName}ViewModel";
+
+                    targetFile = FindRelateViewModelFile(projectDirectory, activeFileName);
+                }
+                else if (activeFileName.EndsWith(".cs"))
+                {
+                    activeFileName = activeFileName.Replace(".cs", string.Empty);
+
+                    if (activeFileName.EndsWith("ViewModel"))
+                    {
+                        activeFileName = activeFileName.Replace("Model", string.Empty);
+                        targetFile = FindRelateViewFile(projectDirectory, activeFileName);
+                    }
+                }
 
                 if (targetFile != string.Empty)
                 {
@@ -126,10 +138,39 @@ namespace WPFMVVMFileOpen2019
                         OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
                 }
             }
-
         }
 
-        private string FindRelativeFile(string directoryPath, string targetFileName)
+        private string FindRelateViewFile(string directoryPath, string targetFileName)
+        {
+            string targetFilePath = string.Empty;
+
+            foreach (string dir in Directory.GetFileSystemEntries(directoryPath))
+            {
+                if (File.Exists(dir))
+                {
+                    FileInfo fileInfo = new FileInfo(dir);
+
+                    if (fileInfo.Extension == ".xaml")
+                    {
+                        var currentFileName = fileInfo.Name.Replace(fileInfo.Extension, string.Empty);
+
+                        if (currentFileName == targetFileName)
+                        {
+                            targetFilePath = dir;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    FindRelateViewFile(dir, targetFileName);
+                }
+            }
+
+            return targetFilePath;
+        }
+
+        private string FindRelateViewModelFile(string directoryPath, string targetFileName)
         {
             string targetFilePath = string.Empty;
 
@@ -152,14 +193,14 @@ namespace WPFMVVMFileOpen2019
                 }
                 else
                 {
-                    FindRelativeFile(dir, targetFileName);
+                    FindRelateViewModelFile(dir, targetFileName);
                 }
             }
 
             return targetFilePath;
         }
 
-        private string FindProjectPath()
+        private string FindCsProjectPath()
         {
             var context = Package.GetGlobalService(typeof(DTE)) as DTE;
 
@@ -169,12 +210,12 @@ namespace WPFMVVMFileOpen2019
                 projectPath.Add(proj.FullName);
             }
 
-            var targetFilePath = context.DTE.ActiveDocument.Path;
+            var targetFilePath = context.DTE.ActiveDocument.Path.ToLower();
             var targetProjectPath = string.Empty;
 
             foreach (var proj in projectPath)
             {
-                if (proj.Contains(targetFilePath))
+                if (proj.ToLower().Contains(targetFilePath))
                 {
                     targetProjectPath = proj;
                     break;
@@ -189,7 +230,8 @@ namespace WPFMVVMFileOpen2019
             var context = Package.GetGlobalService(typeof(DTE)) as DTE;
             var filePath = context.ActiveDocument.FullName;
             FileInfo file = new FileInfo(filePath);
-            return file.Name.Replace(file.Extension, string.Empty);
+            // return file.Name.Replace(file.Extension, string.Empty);
+            return file.Name;
         }
     }
 }
