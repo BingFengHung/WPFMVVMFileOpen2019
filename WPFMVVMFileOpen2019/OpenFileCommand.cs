@@ -163,7 +163,10 @@ namespace WPFMVVMFileOpen2019
                 }
                 else
                 {
-                    FindRelateViewFile(dir, targetFileName);
+                    targetFilePath = FindRelateViewFile(dir, targetFileName);
+
+                    if (targetFilePath != string.Empty)
+                        break;
                 }
             }
 
@@ -193,7 +196,10 @@ namespace WPFMVVMFileOpen2019
                 }
                 else
                 {
-                    FindRelateViewModelFile(dir, targetFileName);
+                    targetFilePath = FindRelateViewModelFile(dir, targetFileName);
+
+                    if (targetFilePath != string.Empty)
+                        break;
                 }
             }
 
@@ -213,14 +219,17 @@ namespace WPFMVVMFileOpen2019
             var targetFilePath = context.DTE.ActiveDocument.Path.ToLower();
             var targetProjectPath = string.Empty;
 
+            /*
             foreach (var proj in projectPath)
             {
-                if (proj.ToLower().Contains(targetFilePath))
+                if (targetFilePath.Contains(proj.ToLower()))
                 {
                     targetProjectPath = proj;
                     break;
                 }
-            }
+            }*/
+
+            targetProjectPath = projectPath.Find(x => x.Contains(".csproj"));
 
             return targetProjectPath;
         }
